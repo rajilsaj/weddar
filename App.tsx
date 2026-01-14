@@ -1,33 +1,63 @@
-
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import React, { useRef } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { NavigationMenu } from './src/components/shared/NavigationMenu';
+import { Footer } from './src/components/shared/Footer';
+import { LandingSection } from './src/components/sections/LandingSection';
+import { HomeSection } from './src/components/sections/HomeSection';
+import { StorySection } from './src/components/sections/StorySection';
+import { DetailsSection } from './src/components/sections/DetailsSection';
+import { WishlistSection } from './src/components/sections/WishlistSection';
+import { colors } from './src/constants';
 
 export default function App() {
+  const scrollViewRef = useRef<ScrollView>(null);
+  const sectionRefs = useRef({
+    home: 0,
+    story: 0,
+    details: 0,
+    wishlist: 0,
+    gallery: 0,
+  });
+
+  const handleSectionLayout = (section: keyof typeof sectionRefs.current) => (event: any) => {
+    const { y } = event.nativeEvent.layout;
+    sectionRefs.current[section] = y;
+  };
+
+  const scrollToSection = (section: string) => {
+    const sectionKey = section.toLowerCase() as keyof typeof sectionRefs.current;
+    const yPosition = sectionRefs.current[sectionKey];
+
+    if (scrollViewRef.current && yPosition !== undefined) {
+      scrollViewRef.current.scrollTo({
+        y: yPosition,
+        animated: true,
+      });
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>💍 Wedding RSVP</Text>
+      <NavigationMenu onNavigate={scrollToSection} />
 
-      <Text style={styles.subtitle}>
-        Welcome! This is a demo UI to confirm deployment.
-      </Text>
+      <ScrollView
+        ref={scrollViewRef}
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+      >
+        <LandingSection />
 
-      <View style={styles.card}>
-        <Text style={styles.label}>Event:</Text>
-        <Text>Rajil & Partner Wedding</Text>
+        <HomeSection onLayout={handleSectionLayout('home')} />
 
-        <Text style={styles.label}>Date:</Text>
-        <Text>August 24, 2026</Text>
+        <StorySection onLayout={handleSectionLayout('story')} />
 
-        <Text style={styles.label}>Location:</Text>
-        <Text>Paris, France 🇫🇷</Text>
-      </View>
+        <DetailsSection onLayout={handleSectionLayout('details')} />
 
-      <Pressable style={styles.button}>
-        <Text style={styles.buttonText}>RSVP Coming Soon</Text>
-      </Pressable>
+        <WishlistSection onLayout={handleSectionLayout('wishlist')} />
 
-      <Text style={styles.footer}>
-        Demo UI • Expo Web + Supabase • $0 Stack
-      </Text>
+        <Footer />
+      </ScrollView>
     </View>
   );
 }
@@ -35,52 +65,9 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafafa',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
+    backgroundColor: colors.background,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#555',
-    marginBottom: 24,
-    textAlign: 'center',
-  },
-  card: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 12,
-    width: '100%',
-    maxWidth: 360,
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  label: {
-    fontWeight: '600',
-    marginTop: 8,
-  },
-  button: {
-    backgroundColor: '#111',
-    paddingVertical: 14,
-    paddingHorizontal: 28,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  footer: {
-    marginTop: 32,
-    fontSize: 12,
-    color: '#888',
+  scrollView: {
+    flex: 1,
   },
 });
